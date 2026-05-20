@@ -1,0 +1,192 @@
+﻿services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: ecowatch-api-gateway
+    env_file: .env
+    ports:
+      - "31033:8500"
+    depends_on:
+      - ingestion-service
+      - map-service
+      - analysis-service
+      - alert-service
+      - report-service
+      - user-service
+      - notification-service
+    networks: [ecowatch-net]
+
+  ingestion-service:
+    build:
+      context: .
+      dockerfile: ingestion-service/Dockerfile
+    container_name: ecowatch-ingestion
+    env_file: .env
+    ports:
+      - "31250:8501"
+    depends_on:
+      - timescaledb
+      - rabbitmq
+      - mosquitto
+    networks: [ecowatch-net]
+
+  map-service:
+    build:
+      context: .
+      dockerfile: map-service/Dockerfile
+    container_name: ecowatch-map
+    env_file: .env
+    ports:
+      - "31251:8502"
+    depends_on:
+      - postgis
+      - redis
+    networks: [ecowatch-net]
+
+  analysis-service:
+    build:
+      context: .
+      dockerfile: analysis-service/Dockerfile
+    container_name: ecowatch-analysis
+    env_file: .env
+    ports:
+      - "31032:8503"
+    depends_on:
+      - timescaledb
+      - rabbitmq
+      - redis
+    networks: [ecowatch-net]
+
+  alert-service:
+    build:
+      context: .
+      dockerfile: alert-service/Dockerfile
+    container_name: ecowatch-alert
+    env_file: .env
+    ports:
+      - "31252:8504"
+    depends_on:
+      - redis
+      - rabbitmq
+    networks: [ecowatch-net]
+
+  report-service:
+    build:
+      context: .
+      dockerfile: report-service/Dockerfile
+    container_name: ecowatch-report
+    env_file: .env
+    ports:
+      - "31253:8505"
+    depends_on:
+      - postgres
+      - timescaledb
+    networks: [ecowatch-net]
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: ecowatch-user
+    env_file: .env
+    ports:
+      - "31254:8506"
+    depends_on:
+      - postgres
+      - redis
+    networks: [ecowatch-net]
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: ecowatch-notification
+    env_file: .env
+    ports:
+      - "31255:8507"
+    depends_on:
+      - rabbitmq
+    networks: [ecowatch-net]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: ecowatch-frontend
+    env_file: .env
+    ports:
+      - "31034:5178"
+    depends_on:
+      - api-gateway
+    networks: [ecowatch-net]
+
+  postgres:
+    image: postgres:16
+    container_name: ecowatch-postgres
+    environment:
+      POSTGRES_DB: ecowatch
+      POSTGRES_USER: ecowatch
+      POSTGRES_PASSWORD: ecowatch
+    ports:
+      - "55535:5432"
+    volumes:
+      - ecowatch_postgres_data:/var/lib/postgresql/data
+    networks: [ecowatch-net]
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: ecowatch-timescaledb
+    environment:
+      POSTGRES_DB: ecowatch
+      POSTGRES_USER: ecowatch
+      POSTGRES_PASSWORD: ecowatch
+    ports:
+      - "55536:5432"
+    volumes:
+      - ecowatch_timescaledb_data:/var/lib/postgresql/data
+    networks: [ecowatch-net]
+
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: ecowatch-postgis
+    environment:
+      POSTGRES_DB: ecowatch_geo
+      POSTGRES_USER: ecowatch
+      POSTGRES_PASSWORD: ecowatch
+    ports:
+      - "55537:5432"
+    volumes:
+      - ecowatch_postgis_data:/var/lib/postgresql/data
+    networks: [ecowatch-net]
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ecowatch-rabbitmq
+    ports:
+      - "31030:5672"
+      - "31031:15672"
+    networks: [ecowatch-net]
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: ecowatch-mqtt
+    ports:
+      - "31256:1883"
+    networks: [ecowatch-net]
+
+  redis:
+    image: redis:7
+    container_name: ecowatch-redis
+    ports:
+      - "32015:6379"
+    networks: [ecowatch-net]
+
+networks:
+  ecowatch-net:
+    driver: bridge
+
+volumes:
+  ecowatch_postgres_data:
+  ecowatch_timescaledb_data:
+  ecowatch_postgis_data:
