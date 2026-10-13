@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Any
@@ -119,12 +119,6 @@ async def list_users(role: Role | None = None, region: str | None = None) -> dic
     return {"items": items, "count": len(items)}
 
 
-@app.get("/users/{user_id}")
-async def get_user(user_id: str) -> dict[str, Any]:
-    user = users.get(user_id)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user.model_dump(mode="json")
 
 
 @app.post("/users")
@@ -245,3 +239,11 @@ async def get_audit(limit: int = 100, actor_role: Role = Role.ADMIN) -> dict[str
     if not has_permission(actor_role, "audit:read"):
         raise HTTPException(status_code=403, detail="Forbidden")
     return {"items": audit_log[-limit:]}
+
+
+@app.get("/users/{user_id}")
+async def get_user(user_id: str) -> dict[str, Any]:
+    user = users.get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user.model_dump(mode="json")

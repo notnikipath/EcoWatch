@@ -1,4 +1,4 @@
-﻿# EcoWatch
+# EcoWatch
 
 EcoWatch is a microservice platform for public ecological monitoring: air, water, noise, radiation, and weather parameters from stationary sensors, mobile measurements, and open data sources.
 
@@ -41,7 +41,7 @@ EcoWatch is a microservice platform for public ecological monitoring: air, water
 ## Local run
 
 ```bash
-cd 'your/project/folder'
+cd EcoWatch
 docker compose up --build -d
 ```
 

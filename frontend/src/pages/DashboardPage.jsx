@@ -95,7 +95,7 @@ export function DashboardPage() {
       <header className="hero">
         <div>
           <p className="eyebrow">EcoWatch Public Monitoring</p>
-          <h1>Urban ecology in near real time: air, water, noise, radiation, and weather.</h1>
+          <h1>Environmental overview</h1>
           <p className="hero-sub">Citizen sensors + stationary posts + open data feeds with threshold alerts and map layers.</p>
           <div className="hero-tags">
             <span>Update every &lt; 5 min</span>
